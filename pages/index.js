@@ -1,55 +1,15 @@
 import React, { Component, Fragment } from 'react';
 import firebase from 'firebase';
-import 'isomorphic-unfetch';
+import Router from 'next/router';
 
-import firebaseConfig from '../config/firebase';
+import { redirect, getUserSession } from 'index/utils';
 
 class App extends Component {
-  static async getInitialProps({ req, query }) {
-    console.log('request!');
-    console.dir(req);
-    return {};
-  }
-
-  componentDidMount() {
-    firebase.initializeApp(firebaseConfig.client);
-
-    // if (this.state.user) this.addDbListener();
-
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        console.log('user!');
-        console.dir(user);
-        this.user = user;
-        // this.setState({ user: user });
-        // return user
-        //   .getIdToken()
-        //   .then(token => {
-        //     // eslint-disable-next-line no-undef
-        //     return fetch('/api/login', {
-        //       method: 'POST',
-        //       // eslint-disable-next-line no-undef
-        //       headers: new Headers({ 'Content-Type': 'application/json' }),
-        //       credentials: 'same-origin',
-        //       body: JSON.stringify({ token }),
-        //     });
-        //   })
-        //   .then(res => this.addDbListener());
-      } else {
-        console.log('no-user!');
-        //     this.setState({ user: null });
-        // // eslint-disable-next-line no-undef
-        // fetch('/api/logout', {
-        //   method: 'POST',
-        //   credentials: 'same-origin',
-        // }).then(() =>
-        //   firebase
-        //     .database()
-        //     .ref('messages')
-        //     .off(),
-        // );
-      }
-    });
+  static async getInitialProps({ req, res }) {
+    const result = await getUserSession(req);
+    if (result.status !== 200) return redirect({ pathname: '/login' }, res);
+    const props = await result.json();
+    return props;
   }
 
   addNode = () => {
@@ -65,8 +25,7 @@ class App extends Component {
   };
 
   sendAuth = () => {
-    // const token = this.user.getIdToken();
-    this.user
+    this.state.user
       .getIdToken()
       .then(token => {
         console.log('token!', token);
@@ -94,7 +53,7 @@ class App extends Component {
         'michaelandreynolds@gmail.com',
         'muchos-xEdni-19-1!',
       )
-      .catch(function(error) {
+      .catch(error => {
         console.log('error!');
         console.log(error);
         // Handle Errors here.
@@ -104,11 +63,18 @@ class App extends Component {
       });
   };
 
+  logout = async () =>
+    await fetch(`/api/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    }).then(res => console.log('logout res!', res) || Router.replace('/login'));
+
   render = () => {
     return (
       <Fragment>
         <button onClick={this.sendAuth}>auth endpoint!</button>
-        <button onClick={this.addElasticDocument}>add doc</button>
+        <button onClick={this.login}>login</button>
+        <button onClick={this.logout}>logout</button>
         <button
           onClick={() =>
             this.getElasticDocument(
