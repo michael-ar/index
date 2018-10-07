@@ -13,41 +13,52 @@ const LIFESPAN = parseInt(30 * 24 * 60 * 60, 10);
 
 let activeSession;
 
-const getUserSession = (req, res, next) =>
-  firebase
-    .auth()
-    .verifyIdToken(req.cookies[COOKIE_NAME])
-    .then(user => {
-      activeSession = uuid();
-      res.json({ user, csrfToken: activeSession });
-    });
-
-const login = (req, res) => {
-  res.cookie(COOKIE_NAME, req.body.token, {
-    maxAge: LIFESPAN,
-    httpOnly: true,
-    domain: DOMAIN,
-  });
-  res.end();
-};
-
-const logout = (req, res) => {
-  res.cookie(COOKIE_NAME, req.body.token, {
+const unsetCookie = res =>
+  res.cookie(COOKIE_NAME, '', {
     maxAge: -1,
     httpOnly: true,
     domain: DOMAIN,
   });
+
+const getUserSession = (req, res, next) =>
+  req.cookies[COOKIE_NAME]
+    ? firebase
+        .auth()
+        .verifySessionCookie(req.cookies[COOKIE_NAME])
+        .then(user => {
+          activeSession = uuid();
+          res.json({ user, csrfToken: activeSession });
+        })
+    : res.status(401).send({ authError: 'Session invalid, login required' });
+
+const login = (req, res) =>
+  admin
+    .auth()
+    .createSessionCookie(req.body.token, { expiresIn: LIFESPAN })
+    .then(sessionCookie => {
+      res.cookie(COOKIE_NAME, sessionCookie, {
+        maxAge: LIFESPAN,
+        httpOnly: true,
+        domain: DOMAIN,
+      });
+      res.end();
+    });
+
+const logout = (req, res) => {
+  unsetCookie(res);
   res.end();
 };
 
 const authMiddleware = fn => (req, res, next) =>
   firebase
     .auth()
-    .verifyIdToken(req.cookies[COOKIE_NAME])
+    .verifySessionCookie(req.cookies[COOKIE_NAME], true)
     .then(() => {
-      if (req.body.sessionToken !== activeSession)
-        throw new Error('Invalid session');
-      return;
+      if (req.body.sessionToken !== activeSession) {
+        unsetCookie(res);
+        res.status(401).send({ authError: 'Session invalid, login required' });
+        throw new Error('Unauthorised');
+      }
     })
     .then(() => fn(req, res, next))
     .catch(error => res.json({ error }));

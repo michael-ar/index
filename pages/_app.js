@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { StrictMode } from 'react';
 import App, { Container } from 'next/app';
 import firebase from 'firebase';
 import 'isomorphic-unfetch';
@@ -14,16 +14,18 @@ export default class MyApp extends App {
     return props;
   }
 
-  componentDidMount() {
+  componentDidMount = () => {
     firebase.initializeApp(firebaseConfig.client);
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
-  }
+  };
 
   render() {
     const { Component, pageProps } = this.props;
     return (
       <Container>
-        <Component {...this.state} {...pageProps} />
+        <StrictMode>
+          <Component {...this.state} {...pageProps} />
+        </StrictMode>
       </Container>
     );
   }

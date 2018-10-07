@@ -4,7 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
-const { getElasticDocument } = require('./endpoints/elasticsearch');
+const { getElasticNode } = require('./endpoints/elasticsearch');
 const {
   login,
   logout,
@@ -34,7 +34,9 @@ app.prepare().then(() => {
   server.post('/api/getUserSession', getUserSession);
   server.post('/api/logout', logout);
   server.post('/api/login', login);
-  server.post('/api/search', guardMiddleware(getElasticDocument));
+
+  server.post('/api/getElasticNode', guardMiddleware(getElasticNode));
+  server.post('/api/search', guardMiddleware(getElasticNode));
 
   server.get('*', (req, res) => {
     return handle(req, res);
