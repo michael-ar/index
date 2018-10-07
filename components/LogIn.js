@@ -2,39 +2,27 @@ import React from 'react';
 import Router from 'next/router';
 import firebase from 'firebase';
 
+import { user } from 'index/config/firebase';
+
 const login = e => {
   e.preventDefault();
   firebase
     .auth()
-    .signInWithEmailAndPassword(
-      'michaelandreynolds@gmail.com',
-      'muchos-xEdni-19-1!',
-    )
-    .then(user => {
-      console.log('user!');
-      console.log(user);
-
-      return user.user.getIdToken().then(token =>
+    .signInWithEmailAndPassword(user.email, user.password)
+    .then(user =>
+      user.user.getIdToken().then(token =>
         fetch('/api/login', {
           method: 'POST',
           headers: new Headers({ 'Content-Type': 'application/json' }),
           credentials: 'same-origin',
           body: JSON.stringify({ token }),
         }),
-      );
-    })
-    .then(res => {
-      Router.replace('/');
-      console.log('res!');
-      console.log(res);
-    })
-    .catch(function(error) {
+      ),
+    )
+    .then(() => Router.replace('/'))
+    .catch(error => {
       console.log('error!');
       console.log(error);
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      // ...
     });
 };
 
