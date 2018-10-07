@@ -1,0 +1,13 @@
+/* will import root styles in either _app or _document */
+
+:root {
+  --some-color: red;
+  color: var(--some-color);
+}
+
+.wrapper {
+  color: black;
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+}

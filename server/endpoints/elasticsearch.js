@@ -10,7 +10,7 @@ client.ping({ requestTimeout: 1000 }, error =>
   console.log(`elasticsearch cluster is ${error ? 'down' : 'healthy'}!`),
 );
 
-const addElasticDocument = async (req, res, next) => {
+const addElasticNode = async (req, res, next) => {
   const now = new Date();
   await client.create({
     index: 'nodes',
@@ -24,7 +24,7 @@ const addElasticDocument = async (req, res, next) => {
   });
 };
 
-const getElasticDocument = async (req, res, next) => {
+const getElasticNode = async (req, res, next) => {
   const { id } = req.body;
   const doc = await client.get({
     index: 'nodes',
@@ -35,6 +35,6 @@ const getElasticDocument = async (req, res, next) => {
 };
 
 module.exports = {
-  addElasticDocument,
-  getElasticDocument,
+  addElasticNode,
+  getElasticNode,
 };

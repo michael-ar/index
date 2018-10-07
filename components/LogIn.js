@@ -2,6 +2,7 @@ import React from 'react';
 import Router from 'next/router';
 import firebase from 'firebase';
 
+import api from 'index/api';
 import { user } from 'index/config/firebase';
 
 const login = e => {
@@ -9,21 +10,7 @@ const login = e => {
   firebase
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
-    .then(user =>
-      user.user.getIdToken().then(token =>
-        fetch('/api/login', {
-          method: 'POST',
-          headers: new Headers({ 'Content-Type': 'application/json' }),
-          credentials: 'same-origin',
-          body: JSON.stringify({ token }),
-        }),
-      ),
-    )
-    .then(() => Router.replace('/'))
-    .catch(error => {
-      console.log('error!');
-      console.log(error);
-    });
+    .then(({ user }) => user.getIdToken().then(api.login));
 };
 
 const LogIn = props => {
