@@ -1,5 +1,5 @@
 const elasticsearch = require('elasticsearch');
-const config = require('../config/elasticsearch');
+const config = require('../../config/elasticsearch');
 
 const client = new elasticsearch.Client({
   host: config.host,
@@ -26,16 +26,15 @@ const addElasticDocument = async (req, res, next) => {
 
 const getElasticDocument = async (req, res, next) => {
   const { id } = req.body;
-  console.log('get-doc!', id);
   const doc = await client.get({
     index: 'nodes',
     type: 'node',
     id,
   });
-  console.log('get-doc-res!', doc);
   res.json(doc);
 };
 
 module.exports = {
+  addElasticDocument,
   getElasticDocument,
 };

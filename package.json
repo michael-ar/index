@@ -4,12 +4,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "node server/",
+    "dev": "rm -rf ./next && node server/",
     "build": "next build",
     "start": "NODE_ENV=production node server/"
   },
   "license": "ISC",
   "dependencies": {
+    "cookie": "^0.3.1",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.4",
     "elasticsearch": "^15.1.1",
     "express": "^4.16.3",
     "firebase": "^5.5.1",
@@ -17,7 +20,8 @@
     "isomorphic-unfetch": "^3.0.0",
     "next": "^7.0.0",
     "react": "^16.5.2",
-    "react-dom": "^16.5.2"
+    "react-dom": "^16.5.2",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "prettier": "^1.14.3"
